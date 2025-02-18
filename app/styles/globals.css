@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 🌟 Root Variables for Ramp Theming */
+:root {
+  --ramp-primary: #E4F222;
+  --ramp-text: #1A1919;
+  --ramp-gray: #D2CECB;
+  --ramp-border: #E5E7EB;
+  --ramp-hover: #f5ff80;
+}
+
+/* 🌍 Global Styling */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: "Lausanne", "Inter", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  background-color: rgb(252, 250, 249);
+  color: var(--ramp-text);
+}
+
+/* 🌎 Next.js App Container */
+#__next, .app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 📌 Page Container - Expands Page */
+.page-container {
+  max-width: 90vw; /* Allow more width */
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  flex-grow: 1; /* Ensure it takes up space */
+}
+
+/* 🎨 Buttons */
+.btn-ramp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ramp-primary);
+  color: var(--ramp-text);
+  font-weight: 500;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--ramp-gray);
+  transition: background 0.2s ease-in-out;
+}
+
+.btn-ramp:hover {
+  background-color: var(--ramp-hover);
+}
+
+.btn-danger {
+  background-color: #DC2626;
+  color: white;
+  font-weight: 500;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: background 0.2s ease-in-out;
+}
+
+.btn-danger:hover {
+  background-color: #B91C1C;
+}
+
+/* 📋 Table Styling - Stretch and Optimize */
+.table-style {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.table-style th, .table-style td {
+  white-space: nowrap; /* Prevents text from wrapping awkwardly */
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--ramp-border);
+}
+
+/* 🔄 Make Table Containers Expand */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* 📩 Improve Input Fields */
+.input-field {
+  padding: 12px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--ramp-gray);
+  background-color: white;
+  color: black;
+}
+
+.input-field:focus {
+  outline: 2px solid var(--ramp-primary);
+}
+
+/* 🔄 Improve Flexbox Layouts */
+.flex-container {
+  display: flex;
+  gap: 16px; /* Adds spacing between tables */
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.flex-item {
+  flex: 1;
+  min-width: 0; /* Ensures proper sizing */
+}
+
+/* 🏷 Typography */
+.text-bold {
+  font-weight: 700;
+}
+
+.text-medium {
+  font-weight: 500;
+}
+
+.text-gray {
+  color: var(--ramp-gray);
+}
+
+.text-sm {
+  font-size: 14px;
+}
+
+/* 🚀 Header Styles */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* 📜 Ensure Smooth Scrolling */
+.overflow-auto {
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.overflow-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 5px;
+}
+
+/* 🔄 Utility Flexbox */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 🔵 Status Pill */
+.status-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* ✅ Adjusts Table Layout to Avoid Cutoff */
+.table-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+/* 🛠 Fix Text Overflow in Table Cells */
+.table-style th, .table-style td {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 200px; /* Adjust as needed */
+}
+
+/* 🎨 Card-like Styling for Tables */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}

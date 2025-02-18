@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ERPAccount {
+  id        String  @id @default(uuid())
+  ramp_id   String?
+  name      String
+  code      String
+  type      String
+  is_active Boolean @default(true)
+}
+
+model CustomFields {
+  id            String  @id @default(uuid())
+  ramp_id       String?
+  name          String
+  input_type    String
+  is_splittable String
+  is_active     Boolean @default(true)
+}
+
+model CustomFieldsOptions {
+  id        String  @id @default(uuid())
+  field_id  String
+  value     String
+  code      String
+  is_active Boolean @default(true)
+  ramp_field_id       String?
+}
+
+model Vendor {
+  id                 String   @id @default(uuid()) // Unique ID for internal reference
+  erp_id             String?  // ID from ERP system (if exists)
+  ramp_vendor_id     String?  // ID from Ramp's "vendors" endpoint (if exists)
+  ramp_accounting_id String? 
+  ramp_vendor_contact_id String? // ID from Ramp's "accounting_vendors" endpoint (if exists)
+  name               String   // Vendor name
+  tax_id             String?  // EIN, TIN, or other tax identifier
+  email              String?  // Vendor contact email
+  phone              String?  // Vendor phone number
+  address            String?  // Vendor address (single-line storage for now)
+  city              String?  
+  state             String?  
+  zip_code          String?  
+  country           String?  
+  payment_method    String?  // ACH, Check, Wire, Credit Card, etc.
+  bank_account      String?  // Last 4 of bank account or identifier for ACH
+  routing_number    String?  // Routing number for ACH payments
+  created_at        DateTime @default(now()) // Timestamp when added to DB
+  updated_at        DateTime @updatedAt // Timestamp for last update
+  is_active         Boolean  @default(true) // Vendor is active or inactive
+}
+model Users {
+  id                String   @id @default(uuid())
+  user_email        String
+  first_name        String?
+  last_name         String?
+  ramp_employee_id  String?
+  ramp_role         String? 
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  is_active         Boolean  @default(true)
+}
+model Entities {
+  entity_id    String   @id @default(uuid())
+  entity_name  String
+  ramp_entity_id String?
+}
+model Bills {
+  id                String   @id @default(uuid())
+  ramp_bill_id      String?
+  invoice_number        String
+  memo String?
+  invoice_currency String
+  payment_method   String
+  ramp_entity_id String?
+  vendor_contact_id String
+  vendor_id  String
+  due_date          DateTime
+  issue_date        DateTime
+  
+  // Relation: Each bill has multiple line items
+  line_items        BillLineItem[]
+}
+
+model BillLineItem {
+  id             String  @id @default(uuid())
+  bill_id        String  // Foreign key to Bills
+  description    String
+  line_type      String
+  quantity       Int
+  unit_price     Float
+  total_amount   Float // Should be calculated as quantity * unit_price
+  gl_account_id  String? // Optional field to associate with GL accounts
+  category_id    String? // Optional field for accounting categories
+  field_option_id String?
+
+  // Relation: Each line item belongs to a bill
+  bill           Bills   @relation(fields: [bill_id], references: [id], onDelete: Cascade)
+}
