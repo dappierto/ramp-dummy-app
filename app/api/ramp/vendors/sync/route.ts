@@ -1,3 +1,7 @@
+import { getActiveAccountToken } from "@/app/lib/ramp";
+const token = await getActiveAccountToken();
+
+
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
@@ -13,7 +17,7 @@ export async function GET() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ramp_tok_UfFJbYxa1wIEJTKZC1kzMfq5Ki8xUz8m8XkIsQlGxH`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

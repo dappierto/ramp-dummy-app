@@ -4,10 +4,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const RAMP_API_URL = "https://demo-api.ramp.com/developer/v1/accounting/vendors";
 
+import { getActiveAccountToken } from "@/app/lib/ramp";
+
+
 export async function GET() {
   try {
     console.log("🚀 Starting ERP Vendor Sync to Ramp...");
-
+    const token = await getActiveAccountToken();
     // Fetch all ERP vendors that have not yet been synced (ramp_vendor_id is NULL)
     const unsyncedVendors = await prisma.vendor.findMany({
       where: { ramp_accounting_id: null },
@@ -34,7 +37,7 @@ export async function GET() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ramp_tok_uhNHVaTlfECLF1Z0krVrTLssMWN6rXmFUWJaF6JbXq`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });

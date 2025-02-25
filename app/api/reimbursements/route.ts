@@ -1,13 +1,16 @@
+import { getActiveAccountToken } from "@/app/lib/ramp";
+const token = await getActiveAccountToken();
+
 export async function GET() {
   try {
     // ✅ Construct the API URL with query parameters
     const url = new URL("https://demo-api.ramp.com/developer/v1/reimbursements?sync_ready=true&has_no_sync_commits=true");
-
+  
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_7zL5gGpp94MlwjTXsUmX2ME7QIISLED7I0wne6yMRe`,
+        "Authorization": `Bearer ${token}`,
       },
     });
 

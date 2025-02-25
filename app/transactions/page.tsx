@@ -107,65 +107,186 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">🚀 Ramp Transactions</h1>
-        <button onClick={() => router.push("/")} className="btn-ramp">← Back to Command Center</button>
-      </div>
-
-      {/* Master Sync Buttons */}
-      <div className="flex gap-4 mb-4">
-        <button className="btn-ramp" onClick={() => syncSelectedTransactions(false)}>✅ Sync Selected</button>
-        <button className="btn-danger" onClick={() => syncSelectedTransactions(true)}>❌ Mimic Failed Sync</button>
-      </div>
-
-      {/* Transactions Table */}
-      <div className="overflow-x-auto">
-        <table className="table-style">
-          <thead>
-            <tr>
-              <th><input type="checkbox" /></th>
-              <th>Merchant</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((tx) => (
-              <tr key={tx.id}>
-                <td><input type="checkbox" checked={selectedTransactions.has(tx.id)} onChange={() => toggleSelection(tx.id)} /></td>
-                <td>{tx.merchant_name}</td>
-                <td>{new Date(tx.user_transaction_time).toLocaleDateString()}</td>
-                <td>${tx.amount.toFixed(2)}</td>
-                <td>{tx.sk_category_name || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Raw API Data */}
-      <button onClick={() => setShowRawData(!showRawData)} className="btn-ramp mt-4">📜 Toggle Raw API Data</button>
-      {showRawData && <pre className="bg-gray-100 p-4 rounded overflow-auto">{JSON.stringify(rawApiData, null, 2)}</pre>}
-
-      {/* API Log Panel */}
-      <button onClick={() => setShowLogs(!showLogs)} className="btn-ramp mt-4">📜 Toggle API Logs</button>
-      {showLogs && (
-        <div className="bg-gray-100 p-4 mt-4 rounded overflow-auto">
-          <h2 className="text-lg font-semibold mb-2">📜 API Logs</h2>
-          <div className="space-y-2">
-            {apiLog.map((log, index) => (
-              <div key={index} className={`p-3 rounded ${log.type === "✅ Success" ? "bg-green-100 text-green-800" : log.type === "❌ Error" ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-700"}`}>
-                <span className="font-bold">{log.time} - {log.type}</span>
-                <p className="text-sm text-gray-500">🔗 Endpoint: <span className="font-mono">{log.endpoint}</span> ({log.method})</p>
-                <pre className="whitespace-pre-wrap text-sm">{log.message}</pre>
-              </div>
-            ))}
+    <div className="min-h-screen bg-white">
+      <header className="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div style={{ width: '95%', maxWidth: '1800px', margin: '0 auto' }}>
+          <div className="flex justify-between items-center h-16 px-4">
+            <h1 className="text-2xl font-bold text-gray-900">📊 Ramp Transactions</h1>
+            <button 
+              onClick={() => router.push("/")} 
+              className="btn-ramp flex items-center"
+            >
+              ← Back to Command Center
+            </button>
           </div>
         </div>
-      )}
+      </header>
+
+      <main style={{ width: '95%', maxWidth: '1800px', margin: '0 auto', padding: '0 16px' }}>
+        {/* Action Buttons */}
+        <div className="flex gap-4 mb-6">
+          <button 
+            className="btn-ramp" 
+            onClick={() => syncSelectedTransactions(false)}
+          >
+            ✅ Sync Selected
+          </button>
+          <button 
+            className="btn-danger" 
+            onClick={() => syncSelectedTransactions(true)}
+          >
+            ❌ Mimic Failed Sync
+          </button>
+        </div>
+
+        {/* Transactions Table */}
+        <div className="card mb-6">
+          <div className="overflow-x-auto">
+            <table className="table-style">
+              <thead>
+                <tr>
+                  <th>
+                    <input 
+                      type="checkbox" 
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTransactions(new Set(transactions.map(tx => tx.id)));
+                        } else {
+                          setSelectedTransactions(new Set());
+                        }
+                      }}
+                    />
+                  </th>
+                  <th>Merchant</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedTransactions.has(tx.id)} 
+                        onChange={() => toggleSelection(tx.id)} 
+                      />
+                    </td>
+                    <td>{tx.merchant_name}</td>
+                    <td>{new Date(tx.user_transaction_time).toLocaleDateString()}</td>
+                    <td>
+                      {tx.currency_code} {tx.amount.toFixed(2)}
+                    </td>
+                    <td>{tx.sk_category_name || "—"}</td>
+                    <td>
+                      <span 
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          tx.state === "APPROVED" 
+                            ? "bg-green-100 text-green-800" 
+                            : tx.state === "DECLINED" 
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {tx.state}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {transactions.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4 text-gray-500">
+                      No transactions found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Data and Logs Section */}
+        <div className="space-y-6">
+          {/* Raw API Data Section */}
+          <div>
+            <button 
+              onClick={() => setShowRawData(!showRawData)} 
+              className="btn-ramp mb-2"
+            >
+              {showRawData ? "🔼 Hide" : "🔽 Show"} Raw API Data
+            </button>
+            
+            {showRawData && (
+              <div className="card bg-gray-50 p-4">
+                <pre className="overflow-auto max-h-96 text-sm">
+                  {JSON.stringify(rawApiData, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+
+          {/* API Logs Section */}
+          <div>
+            <button 
+              onClick={() => setShowLogs(!showLogs)} 
+              className="btn-ramp mb-2"
+            >
+              {showLogs ? "🔼 Hide" : "🔽 Show"} API Logs
+            </button>
+            
+            {showLogs && (
+              <div className="card bg-gray-50 p-4">
+                <h2 className="text-lg font-semibold mb-4">📜 API Activity Logs</h2>
+                <div className="space-y-3">
+                  {apiLog.map((log, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-4 rounded ${
+                        log.type.includes("Success") 
+                          ? "bg-green-50 border border-green-200" 
+                          : log.type.includes("Error") 
+                          ? "bg-red-50 border border-red-200" 
+                          : "bg-blue-50 border border-blue-200"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className="font-bold">
+                          {log.type}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {log.time}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium">Endpoint:</span> 
+                        <code className="ml-1 px-1 py-0.5 bg-gray-100 rounded text-xs">
+                          {log.endpoint} ({log.method})
+                        </code>
+                      </p>
+                      <div className="mt-2 bg-white rounded p-2 max-h-40 overflow-auto">
+                        <pre className="whitespace-pre-wrap text-xs">{log.message}</pre>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {apiLog.length === 0 && (
+                    <div className="text-center py-4 text-gray-500">
+                      No API logs yet
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-16 mb-8 text-center text-gray-400 text-sm">
+          <p>© 2025 Ramp API Command Center</p>
+        </footer>
+      </main>
     </div>
   );
 }

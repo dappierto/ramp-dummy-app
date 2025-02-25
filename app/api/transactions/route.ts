@@ -1,13 +1,23 @@
+import { getActiveAccountToken } from "@/app/lib/ramp";
+
+
 export async function GET() {
+  const token = await getActiveAccountToken();
   try {
     // ✅ Construct the API URL with query parameters
+
     const url = new URL("https://demo-api.ramp.com/developer/v1/transactions?sync_ready=true&has_no_sync_commits=true");
+    // app/api/ramp/bills/sync/route.ts
+
+
+// Modify your existing POST function to use the token manager
+
 
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_raUROvsf7qezYwZ6n5CxgK7yT2AANk3OVeuDHRDIp8`,
+        "Authorization": `Bearer ${token}`,
       },
     });
 

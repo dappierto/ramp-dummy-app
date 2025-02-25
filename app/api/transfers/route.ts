@@ -1,3 +1,6 @@
+import { getActiveAccountToken } from "@/app/lib/ramp";
+const token = await getActiveAccountToken();
+
 export async function GET() {
   try {
     // ✅ Construct the API URL with query parameters
@@ -7,7 +10,7 @@ export async function GET() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_ItmARUEPXiYfQ1l7r1Nvm8roTqWl7L2OsAiSr2NnYP`,
+        "Authorization": `Bearer ${token}`,
       },
     });
 

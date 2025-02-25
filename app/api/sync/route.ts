@@ -1,9 +1,11 @@
+import { TokenManager } from "@/app/lib/tokens/tokenManager";
+
 export async function POST(req: Request) {
     try {
       if (req.method !== "POST") {
         return new Response(JSON.stringify({ message: "Method Not Allowed" }), { status: 405 });
       }
-  
+  const token = await TokenManager.getInstance().getToken('accounting:write');
       const body = await req.json();
   
       // ✅ Dynamically set sync_type (defaults to TRANSACTION_SYNC)
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ramp_tok_1N7UxXdLhF0tEXDN1L2cvqCGDphAYu0bPppRN7ZjJm`, // Replace with valid Ramp API Key
+          "Authorization": `Bearer ${token}`, // Replace with valid Ramp API Key
         },
         body: JSON.stringify(syncData),
       });

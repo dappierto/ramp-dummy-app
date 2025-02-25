@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { TokenManager } from "@/app/lib/tokens/tokenManager";
 
 const prisma = new PrismaClient();
 const RAMP_API_URL = "https://demo-api.ramp.com/developer/v1/entities"; // Ramp Entities API
-
+const token = await TokenManager.getInstance().getToken('entities:read');
 export async function GET() {
   try {
     console.log("🚀 Fetching Ramp Entities & Associating with ERP Entities...");
@@ -13,7 +14,7 @@ export async function GET() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ramp_tok_zXWEvKSyuYevBb6f32pTO923PNXsZ1W8isKpsr0sYu`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

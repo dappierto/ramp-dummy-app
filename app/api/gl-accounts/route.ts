@@ -1,12 +1,15 @@
+import { TokenManager } from "@/app/lib/tokens/tokenManager";
+
 export async function GET() {
   try {
     const url = new URL("https://demo-api.ramp.com/developer/v1/accounting/accounts");
+    const token = await TokenManager.getInstance().getToken('accounting:read');
 
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_vCKDokD91gprDOzK3V02O3x4ce1QnkjuF3bVB9I7Nx`, // Replace with valid API Key
+        "Authorization": `Bearer ${token}`, // Replace with valid API Key
       },
     });
 

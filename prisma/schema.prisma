@@ -104,3 +104,35 @@ model BillLineItem {
   // Relation: Each line item belongs to a bill
   bill           Bills   @relation(fields: [bill_id], references: [id], onDelete: Cascade)
 }
+
+// prisma/schema.prisma
+model ApiTokens {
+  id        String   @id @default(cuid())
+  scope     String   @unique
+  token     String   // Remove the @db.Text modifier
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scope])
+  @@index([expiresAt])
+}
+
+// prisma/schema.prisma
+model RampConnection {
+  id            String   @id @default(cuid())
+  businessName  String
+  businessId    String   @unique
+  accessToken   String
+  refreshToken  String
+  tokenExpires  DateTime
+  scopes        String   // Will store as comma-separated list
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+// prisma/schema.prisma
+model ActiveAccount {
+  id        String   @id @default(cuid())
+  businessId String
+  updatedAt DateTime @updatedAt
+}

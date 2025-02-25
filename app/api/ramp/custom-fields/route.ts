@@ -1,10 +1,13 @@
+import { TokenManager } from "@/app/lib/tokens/tokenManager";
+const token = await TokenManager.getInstance().getToken('accounting:read');
+
 export async function GET(req: Request) {
   try {
     console.log("Fetching Ramp Custom Fields...");
     
     const response = await fetch("https://demo-api.ramp.com/developer/v1/accounting/fields", {
       headers: {
-        Authorization: `Bearer ramp_tok_MxQFarxHLy41ac34svn5Hp8QmO5ENtPM13TkH7EC93`, // Replace with actual API key
+        Authorization: `Bearer ${token}`, // Replace with actual API key
         "Content-Type": "application/json",
       },
     });
