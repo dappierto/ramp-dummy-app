@@ -26,12 +26,11 @@ model CustomFields {
 }
 
 model CustomFieldsOptions {
-  id        String  @id @default(uuid())
-  field_id  String
-  value     String
-  code      String
-  is_active Boolean @default(true)
-  ramp_field_id       String?
+  id                    String  @id @default(uuid())
+  field_id             String  // References CustomFields table
+  value                String
+  is_active            Boolean @default(true)
+  ramp_field_option_id String?  // Stores the Ramp field option ID after sync
 }
 
 model Vendor {
@@ -56,22 +55,23 @@ model Vendor {
   updated_at        DateTime @updatedAt // Timestamp for last update
   is_active         Boolean  @default(true) // Vendor is active or inactive
 }
+
 model Users {
-  id                String   @id @default(uuid())
-  user_email        String
-  first_name        String?
-  last_name         String?
-  ramp_employee_id  String?
-  ramp_role         String? 
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-  is_active         Boolean  @default(true)
+  id            String    @id @default(uuid())
+  first_name    String
+  last_name     String
+  email         String    @unique
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 }
+
 model Entities {
   entity_id    String   @id @default(uuid())
   entity_name  String
   ramp_entity_id String?
 }
+
 model Bills {
   id                String   @id @default(uuid())
   ramp_bill_id      String?
@@ -130,9 +130,85 @@ model RampConnection {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
 // prisma/schema.prisma
 model ActiveAccount {
   id        String   @id @default(cuid())
   businessId String
   updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id            String       @id @default(uuid())
+  name          String
+  industry      String?
+  status        String      @default("active")
+  client_owner  String      // Ramp user ID
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  engagements   Engagement[]
+}
+
+model Engagement {
+  id                  String            @id @default(uuid())
+  name                String
+  client_id           String
+  client              Client            @relation(fields: [client_id], references: [id])
+  engagement_manager  String            // Ramp user ID
+  engagement_director String            // Ramp user ID
+  start_date         DateTime
+  end_date           DateTime?
+  status             String            @default("active")
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  team_members       ProjectTeamMember[]
+  approvers          projectApprover[]
+  project_rules      EngagementApprovalRule[]
+}
+
+model ProjectTeamMember {
+  id            String     @id @default(uuid())
+  engagement_id String
+  engagement    Engagement @relation(fields: [engagement_id], references: [id])
+  user_id       String     // Ramp user ID
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  @@unique([engagement_id, user_id])
+}
+
+model projectApprover {
+  id            String     @id @default(uuid())
+  engagement_id String
+  engagement    Engagement @relation(fields: [engagement_id], references: [id])
+  user_id       String     // Ramp user ID
+  approver_type String     // manager, director, client_owner
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  @@unique([engagement_id, user_id, approver_type])
+}
+
+model ApprovalRule {
+  id            String    @id @default(uuid())
+  min_amount    Float     // Minimum amount for this rule
+  max_amount    Float?    // Maximum amount for this rule (null means no upper limit)
+  approver_type String    // manager, director, client_owner
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@unique([min_amount, max_amount])
+}
+
+model EngagementApprovalRule {
+  id            String     @id @default(uuid())
+  engagement_id String
+  engagement    Engagement @relation(fields: [engagement_id], references: [id])
+  min_amount    Float      // Minimum amount for this rule
+  max_amount    Float?     // Maximum amount for this rule (null means no upper limit)
+  approver_type String     // manager, director, client_owner
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  @@unique([engagement_id, min_amount, max_amount])
 }

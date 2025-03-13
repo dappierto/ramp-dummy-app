@@ -221,3 +221,27 @@ html, body {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
 }
+/* Add to global.css */
+.step-item {
+  @apply flex flex-col items-center;
+}
+
+.step {
+  @apply h-8 w-8 text-center rounded-full border border-gray-300 bg-white flex items-center justify-center font-medium;
+}
+
+.step-item.active .step {
+  @apply border-blue-500 text-blue-500;
+}
+
+.step-item.completed .step {
+  @apply bg-blue-500 text-white border-blue-500;
+}
+
+.step-connector {
+  @apply w-16 h-1 bg-gray-300 mx-2;
+}
+
+.step-item.completed + .step-connector {
+  @apply bg-blue-500;
+}

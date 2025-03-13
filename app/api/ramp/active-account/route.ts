@@ -1,8 +1,6 @@
 // app/api/ramp/active-account/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -11,7 +9,7 @@ export async function GET() {
     });
 
     if (!activeAccount) {
-      return NextResponse.json({ business: null });
+      return NextResponse.json({ businessId: null });
     }
 
     const connection = await prisma.rampConnection.findUnique({
@@ -19,19 +17,16 @@ export async function GET() {
     });
 
     if (!connection) {
-      return NextResponse.json({ business: null });
+      return NextResponse.json({ businessId: null });
     }
 
     return NextResponse.json({
-      business: {
-        businessName: connection.businessName,
-        businessId: connection.businessId
-      }
+      businessId: activeAccount.businessId,
+      businessName: connection.businessName,
+      accessToken: connection.accessToken
     });
   } catch (error) {
-    console.error('Error getting active business:', error);
-    return NextResponse.json({ 
-      error: 'Failed to get active business' 
-    }, { status: 500 });
+    console.error('Failed to get active account:', error);
+    return NextResponse.json({ error: 'Failed to get active account' }, { status: 500 });
   }
 }

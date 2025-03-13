@@ -1,28 +1,33 @@
-import { TokenManager } from "@/app/lib/tokens/tokenManager";
-const token = await TokenManager.getInstance().getToken('accounting:read');
+import { getActiveAccountToken } from "@/app/lib/ramp";
+import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
     console.log("Fetching Ramp Custom Fields...");
     
+    const token = await getActiveAccountToken();
+    
     const response = await fetch("https://demo-api.ramp.com/developer/v1/accounting/fields", {
       headers: {
-        Authorization: `Bearer ${token}`, // Replace with actual API key
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       console.error("Ramp API Error:", response.status, response.statusText);
-      return new Response(JSON.stringify({ error: "Failed to fetch from Ramp API" }), { status: 500 });
+      return NextResponse.json({ error: `${response.status} ${response.statusText}` }, { status: response.status });
     }
 
     const jsonResponse = await response.json();
     console.log("Ramp API Raw Response:", jsonResponse);
 
-    return new Response(JSON.stringify(jsonResponse.data), { status: 200 }); // Extract `data`
+    // Check if the response has a data property
+    const fields = jsonResponse.data || jsonResponse;
+    
+    return NextResponse.json(fields, { status: 200 });
   } catch (error) {
     console.error("Error fetching Ramp Custom Fields:", error);
-    return new Response(JSON.stringify({ error: "Server Error" }), { status: 500 });
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

@@ -1,9 +1,20 @@
 import { TokenManager } from "@/app/lib/tokens/tokenManager";
+import { getActiveAccountToken } from '@/app/lib/ramp';
+interface RampGLAccount {
+  id: string;
+  ramp_id: string;
+  name: string;
+  code?: string;
+  classification: string;
+  status?: string;
+  is_active: boolean;
+  created_at: string;
+}
 
 export async function GET() {
+  const token = await getActiveAccountToken();
   try {
     const url = new URL("https://demo-api.ramp.com/developer/v1/accounting/accounts");
-    const token = await TokenManager.getInstance().getToken('accounting:read');
 
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -18,7 +29,17 @@ export async function GET() {
     }
 
     const rampResponse = await response.json();
-    const glAccounts = rampResponse.data || []; // Extract only the data array
+    const glAccounts = (rampResponse.data || []).map((account: RampGLAccount) => ({
+      id: account.id,
+      ramp_id: account.ramp_id,
+      name: account.name,
+      code: account.code,
+      classification: account.classification,
+      is_active: account.is_active,
+      created_at: account.created_at
+    }));
+
+    console.log('Mapped GL Accounts:', glAccounts); // Add logging to debug
 
     return new Response(JSON.stringify(glAccounts), {
       status: 200,

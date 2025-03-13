@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useActiveAccount } from '@/app/contexts/ActiveAccountContext';
 
 interface RampConnection {
   id: string;
@@ -11,9 +12,8 @@ interface RampConnection {
 }
 
 const AccountSwitcher = () => {
+  const { activeBusinessId, setActiveBusinessId, isLoading } = useActiveAccount();
   const [connections, setConnections] = useState<RampConnection[]>([]);
-  const [activeAccount, setActiveAccount] = useState<RampConnection | null>(null);
-  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -36,50 +36,29 @@ const AccountSwitcher = () => {
       const response = await fetch('/api/ramp/connections');
       const data = await response.json();
       setConnections(data.connections);
-      
-      // Set active account if any
-      const active = data.connections.find((conn: RampConnection) => 
-        conn.businessId === localStorage.getItem('activeAccountId')
-      );
-      if (active) {
-        setActiveAccount(active);
-      } else if (data.connections.length > 0) {
-        setActiveAccount(data.connections[0]);
-      }
     } catch (error) {
       console.error('Error fetching connections:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleAccountSwitch = async (connection: RampConnection) => {
     try {
-      const response = await fetch('/api/ramp/set-active-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId: connection.businessId })
-      });
-      
-      if (response.ok) {
-        setActiveAccount(connection);
-        localStorage.setItem('activeAccountId', connection.businessId);
-        // Dispatch a custom event
-        window.dispatchEvent(new Event('storage'));
-        setIsOpen(false);
-      }
+      await setActiveBusinessId(connection.businessId);
+      setIsOpen(false);
     } catch (error) {
       console.error('Error switching accounts:', error);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center space-x-2">
         <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
       </div>
     );
   }
+
+  const activeAccount = connections.find(conn => conn.businessId === activeBusinessId);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -108,14 +87,14 @@ const AccountSwitcher = () => {
                   key={connection.id}
                   onClick={() => handleAccountSwitch(connection)}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeAccount?.businessId === connection.businessId
+                    activeBusinessId === connection.businessId
                       ? 'bg-indigo-50 text-indigo-700'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-medium truncate">{connection.businessName}</span>
-                    {activeAccount?.businessId === connection.businessId && (
+                    {activeBusinessId === connection.businessId && (
                       <span className="flex-shrink-0 ml-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

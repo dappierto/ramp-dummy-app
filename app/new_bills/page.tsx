@@ -58,6 +58,16 @@ type Bill = {
   entity_name?: string;
 };
 
+// Define API Log type
+type ApiLog = {
+  type: string;
+  endpoint: string;
+  method: string;
+  payload?: any;
+  response?: any;
+  timestamp: string;
+};
+
 export default function BillsPage() {
   const router = useRouter();
   const [billData, setBillData] = useState<BillData>({
@@ -95,31 +105,58 @@ export default function BillsPage() {
   // Toggle for showing create form or bill list
   const [showCreateForm, setShowCreateForm] = useState(false);
 
+  // Add API logging state
+  const [apiLogs, setApiLogs] = useState<ApiLog[]>([]);
+  const [showApiLogs, setShowApiLogs] = useState(false);
+
+  const logApiCall = (type: string, endpoint: string, method: string, payload?: any, response?: any) => {
+    setApiLogs(prev => [{
+      type,
+      endpoint,
+      method,
+      payload,
+      response,
+      timestamp: new Date().toLocaleTimeString()
+    }, ...prev]);
+  };
+
   useEffect(() => {
     fetch("/api/erp-accounts")
       .then((res) => res.json())
       .then((data) => {
+        logApiCall('📥 Fetch', '/api/erp-accounts', 'GET', null, data);
         setErpAccounts(data);
       })
-      .catch((error) => console.error("Error fetching accounts:", error));
+      .catch((error) => {
+        logApiCall('❌ Error', '/api/erp-accounts', 'GET', null, error.message);
+        console.error("Error fetching accounts:", error);
+      });
   }, []);
 
   useEffect(() => {
     fetch("/api/erp/get-entities")
       .then((res) => res.json())
       .then((data) => {
+        logApiCall('📥 Fetch', '/api/erp/get-entities', 'GET', null, data);
         setEntities(data);
       })
-      .catch((error) => console.error("Error fetching entities:", error));
+      .catch((error) => {
+        logApiCall('❌ Error', '/api/erp/get-entities', 'GET', null, error.message);
+        console.error("Error fetching entities:", error);
+      });
   }, []);
 
   useEffect(() => {
     fetch("/api/erp/vendors")
       .then((res) => res.json())
       .then((data) => {
+        logApiCall('📥 Fetch', '/api/erp/vendors', 'GET', null, data);
         setVendors(data);
       })
-      .catch((error) => console.error("Error fetching vendors:", error));
+      .catch((error) => {
+        logApiCall('❌ Error', '/api/erp/vendors', 'GET', null, error.message);
+        console.error("Error fetching vendors:", error);
+      });
   }, []);
 
   useEffect(() => {
@@ -136,10 +173,13 @@ export default function BillsPage() {
     setLoadingBills(true);
     try {
       const response = await fetch("/api/erp/bills");
+      const data = await response.json();
+      
       if (!response.ok) {
         throw new Error("Failed to fetch bills");
       }
-      const data = await response.json();
+
+      logApiCall('📥 Fetch', '/api/erp/bills', 'GET', null, data);
       
       // Process and sort data - sync-eligible bills at the top
       const sortedData = data.sort((a: Bill, b: Bill) => {
@@ -153,6 +193,7 @@ export default function BillsPage() {
       
       setBills(sortedData);
     } catch (error) {
+      logApiCall('❌ Error', '/api/erp/bills', 'GET', null, error instanceof Error ? error.message : 'Unknown error');
       console.error("Error fetching bills:", error);
     } finally {
       setLoadingBills(false);
@@ -170,13 +211,18 @@ export default function BillsPage() {
       return;
     }
 
+    // Show API logs when syncing
+    setShowApiLogs(true);
     setSyncStatus({ status: 'syncing', message: "Syncing bill to Ramp..." });
+
+    const payload = { billId: selectedBillId };
+    logApiCall('📤 Request', '/api/ramp/bills/sync', 'POST', payload);
 
     try {
       const response = await fetch("/api/ramp/bills/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ billId: selectedBillId }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -184,6 +230,8 @@ export default function BillsPage() {
       if (!response.ok) {
         throw new Error(result.error || "Failed to sync bill");
       }
+
+      logApiCall('✅ Success', '/api/ramp/bills/sync', 'POST', payload, result);
 
       setSyncStatus({ 
         status: 'success', 
@@ -202,6 +250,8 @@ export default function BillsPage() {
       }, 5000);
       
     } catch (error) {
+      logApiCall('❌ Error', '/api/ramp/bills/sync', 'POST', payload, error instanceof Error ? error.message : 'Unknown error');
+      
       setSyncStatus({ 
         status: 'error', 
         message: `Error syncing bill: ${error instanceof Error ? error.message : String(error)}` 
@@ -294,6 +344,8 @@ export default function BillsPage() {
         total_amount: item.total_amount,
       })),
     };
+
+    logApiCall('📤 Request', '/api/erp/push-bills', 'POST', billDataPayload);
   
     try {
       const response = await fetch('/api/erp/push-bills', {
@@ -307,6 +359,8 @@ export default function BillsPage() {
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create bill');
       }
+
+      logApiCall('✅ Success', '/api/erp/push-bills', 'POST', billDataPayload, result);
   
       // Reset form to initial state
       setBillData({
@@ -333,6 +387,8 @@ export default function BillsPage() {
       // Scroll to top of form
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
+      logApiCall('❌ Error', '/api/erp/push-bills', 'POST', billDataPayload, error instanceof Error ? error.message : 'Unknown error');
+      
       setFormStatus({
         type: 'error',
         message: `Error creating bill: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -370,6 +426,12 @@ export default function BillsPage() {
         </h1>
         <div className="flex gap-4">
           <button 
+            onClick={() => setShowApiLogs(!showApiLogs)} 
+            className="btn-ramp"
+          >
+            {showApiLogs ? '🔍 Hide API Logs' : '🔍 Show API Logs'}
+          </button>
+          <button 
             onClick={() => setShowCreateForm(!showCreateForm)} 
             className="btn-ramp"
           >
@@ -378,6 +440,54 @@ export default function BillsPage() {
           <button onClick={() => router.push("/")} className="btn-ramp">← Back to Command Center</button>
         </div>
       </header>
+
+      {/* API Logs Panel */}
+      {showApiLogs && (
+        <div className="mb-6 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+          <div className="p-4 bg-gray-100 border-b border-gray-200">
+            <h2 className="text-lg font-semibold">🔍 API Logs</h2>
+            <p className="text-sm text-gray-600">Real-time API calls and responses</p>
+          </div>
+          <div className="p-4 max-h-96 overflow-y-auto">
+            {apiLogs.length > 0 ? (
+              <div className="space-y-4">
+                {apiLogs.map((log, index) => (
+                  <div key={index} className={`p-4 rounded-lg ${
+                    log.type.includes('❌') ? 'bg-red-50 border border-red-200' :
+                    log.type.includes('✅') ? 'bg-green-50 border border-green-200' :
+                    'bg-white border border-gray-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{log.type} {log.method} {log.endpoint}</span>
+                      <span className="text-sm text-gray-500">{log.timestamp}</span>
+                    </div>
+                    {log.payload && (
+                      <div className="mb-2">
+                        <p className="text-sm font-medium text-gray-700 mb-1">Request Payload:</p>
+                        <pre className="text-xs bg-gray-800 text-white p-2 rounded overflow-x-auto">
+                          {JSON.stringify(log.payload, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {log.response && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Response:</p>
+                        <pre className="text-xs bg-gray-800 text-white p-2 rounded overflow-x-auto">
+                          {JSON.stringify(log.response, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                No API calls logged yet. Actions will appear here as they occur.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {formStatus.type && (
         <div className={`mb-6 p-4 rounded-lg ${

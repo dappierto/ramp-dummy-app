@@ -12,21 +12,26 @@ export async function setActiveAccountId(businessId: string) {
 }
 
 export async function getActiveAccountToken() {
-  const activeAccount = await prisma.activeAccount.findUnique({
-    where: { id: 'active' }
-  });
+  try {
+    const activeAccount = await prisma.activeAccount.findUnique({
+      where: { id: 'active' }
+    });
 
-  if (!activeAccount) {
-    throw new Error('No active account selected');
+    if (!activeAccount) {
+      throw new Error('No active account selected');
+    }
+
+    const connection = await prisma.rampConnection.findUnique({
+      where: { businessId: activeAccount.businessId }
+    });
+
+    if (!connection) {
+      throw new Error('Active account not found');
+    }
+
+    return connection.accessToken;
+  } catch (error) {
+    console.error('Failed to get active account token:', error);
+    throw error;
   }
-
-  const connection = await prisma.rampConnection.findUnique({
-    where: { businessId: activeAccount.businessId }
-  });
-
-  if (!connection) {
-    throw new Error('Active account not found');
-  }
-
-  return connection.accessToken;
 }

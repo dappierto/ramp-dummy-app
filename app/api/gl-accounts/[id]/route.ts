@@ -1,8 +1,9 @@
-
+import { getActiveAccountToken } from '@/app/lib/ramp';
 
 
 
 export async function DELETE(req: Request, context: { params: { id: string } }) {
+  const token = await getActiveAccountToken();
   try {
     const { id } = context.params;
 
@@ -12,7 +13,7 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_8zUrA06MpQMeZzM2RHJrB6CgY7Ky46vJXdwavM8bHa`, // Replace with actual API key
+        "Authorization": `Bearer ${token}`, // Replace with actual API key
       },
     });
 
@@ -67,7 +68,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_8zUrA06MpQMeZzM2RHJrB6CgY7Ky46vJXdwavM8bHa`, // Replace with actual API key
+        "Authorization": `Bearer ${token}`, // Replace with actual API key
       },
       body: JSON.stringify(payload),
     });

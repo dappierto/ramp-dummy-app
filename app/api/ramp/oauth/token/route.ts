@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         },
         create: {
           businessId: connectionId,
-          businessName: businessInfo?.business_name_legal || 'Connected Account',
+          businessName: businessInfo?.business_name_legal || 'Connected Account', 
           accessToken: tokenData.access_token,
           refreshToken: tokenData.refresh_token || '',
           tokenExpires: expiryDate,

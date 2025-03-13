@@ -1,8 +1,11 @@
 
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import { getActiveAccountToken } from '@/app/lib/ramp';
+
 
 export async function POST(req: Request) {
+  const token = await getActiveAccountToken();
   try {
     const body = await req.json();
 
@@ -14,7 +17,7 @@ export async function POST(req: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ramp_tok_1N7UxXdLhF0tEXDN1L2cvqCGDphAYu0bPppRN7ZjJm`, // Replace with valid API Key
+        "Authorization": `Bearer ${token}`, // Replace with valid API Key
       },
       body: JSON.stringify({ gl_accounts: body.gl_accounts }),
     });

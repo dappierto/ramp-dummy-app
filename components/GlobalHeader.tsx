@@ -2,46 +2,41 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useActiveAccount } from '@/app/contexts/ActiveAccountContext';
+import AccountSwitcher from './AccountSwitcher';
 
-interface ActiveBusiness {
+interface BusinessDetails {
   businessName: string;
   businessId: string;
 }
 
 const GlobalHeader = () => {
-  const [activeBusiness, setActiveBusiness] = useState<ActiveBusiness | null>(null);
+  const { activeBusinessId, isLoading } = useActiveAccount();
+  const [businessDetails, setBusinessDetails] = useState<BusinessDetails | null>(null);
 
-  const fetchActiveBusiness = async () => {
-    try {
-      const response = await fetch('/api/ramp/active-account');
-      const data = await response.json();
-      if (data.business) {
-        setActiveBusiness(data.business);
+  useEffect(() => {
+    const fetchBusinessDetails = async () => {
+      if (!activeBusinessId) {
+        setBusinessDetails(null);
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching active business:', error);
-    }
-  };
 
-  // Set up an interval to check for changes
-  useEffect(() => {
-    fetchActiveBusiness(); // Initial fetch
-
-    // Poll for changes every few seconds
-    const interval = setInterval(fetchActiveBusiness, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Also set up an event listener for account changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      fetchActiveBusiness();
+      try {
+        const response = await fetch('/api/ramp/connections');
+        const data = await response.json();
+        const activeBusiness = data.connections.find(
+          (conn: BusinessDetails) => conn.businessId === activeBusinessId
+        );
+        if (activeBusiness) {
+          setBusinessDetails(activeBusiness);
+        }
+      } catch (error) {
+        console.error('Error fetching business details:', error);
+      }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+    fetchBusinessDetails();
+  }, [activeBusinessId]);
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -51,21 +46,26 @@ const GlobalHeader = () => {
             Ramp API Command Center
           </div>
           
-          {activeBusiness ? (
-            <div className="flex items-center gap-3">
-              <div className="text-sm text-gray-500 font-geist-sans">Active Business:</div>
-              <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-sm font-medium font-geist-sans">
-                {activeBusiness.businessName}
-                <span className="text-blue-400 text-xs ml-2 font-geist-mono">
-                  {activeBusiness.businessId}
-                </span>
+          <div className="flex items-center gap-6">
+            {businessDetails ? (
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-500 font-geist-sans">Active Business:</div>
+                <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-sm font-medium font-geist-sans">
+                  {businessDetails.businessName}
+                  <span className="text-blue-400 text-xs ml-2 font-geist-mono">
+                    {businessDetails.businessId}
+                  </span>
+                </div>
               </div>
+            ) : (
+              <div className="text-sm text-gray-500 font-geist-sans">
+                No business selected
+              </div>
+            )}
+            <div className="border-l border-gray-200 pl-6">
+              <AccountSwitcher />
             </div>
-          ) : (
-            <div className="text-sm text-gray-500 font-geist-sans">
-              No business selected
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </header>
