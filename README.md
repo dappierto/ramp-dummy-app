@@ -1,32 +1,32 @@
 # Ramp Dummy App
 
-A Next.js application for managing Ramp API integrations and project approvals.
+A Next.js application that allows users to connect their existing Ramp accounts.
 
 ## For Users
 
-To use this application, you only need to:
+To use this application, simply:
 
-1. Log into the application with your credentials
-2. Click "Connect Ramp Account" when you want to link your Ramp account
-3. Authorize the application on Ramp's secure login page
+1. Click "Connect Ramp Account"
+2. Log in to your existing Ramp account when prompted
+3. Authorize the connection
 
-No API credentials or technical setup is required for users.
+That's it! No API credentials or technical setup needed - just your regular Ramp login.
 
-## For Administrators
+## For Application Provider
 
-Before deploying the application, the server administrator must:
+These steps are only for setting up the application itself:
 
-1. **Configure Ramp API Access**
-   - Sign up for a Ramp developer account at [Ramp Developer Portal](https://developers.ramp.com)
-   - Create a new application to get the application's CLIENT_ID and CLIENT_SECRET
-   - These credentials are for server configuration only and are never exposed to users
+1. **Set Up Ramp Developer Account** (One-time setup)
+   - Sign up as a Ramp developer at [Ramp Developer Portal](https://developers.ramp.com)
+   - Create an application to get the application's credentials
+   - These credentials are only for the application server
 
-2. **Set Environment Variables**
+2. **Configure Server**
    Create a `.env` file in the root directory with:
    ```
    DATABASE_URL="file:./dev.db"
-   RAMP_CLIENT_ID=your_ramp_client_id_here
-   RAMP_CLIENT_SECRET=your_ramp_client_secret_here
+   RAMP_CLIENT_ID=your_application_client_id
+   RAMP_CLIENT_SECRET=your_application_client_secret
    ```
 
 3. **Initialize Database**
@@ -43,7 +43,7 @@ Before deploying the application, the server administrator must:
 
 ## Running the Application
 
-After completing the server setup:
+After server setup:
 
 ```bash
 npm run dev
@@ -51,13 +51,13 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## Features
 
-- Simple one-click Ramp account connection
-  - Users connect their accounts through Ramp's secure OAuth login
-  - No API credentials or technical setup needed for users
+- Easy Ramp account connection
+  - Users just log in with their existing Ramp credentials
+  - No developer account or API setup needed for users
 - Project and client management
 - Approval rules configuration
 - Dynamic approval workflows
@@ -73,33 +73,30 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Common issues and solutions:
 
-1. **Database Issues** (Administrators only)
-   ```bash
-   # If you have database issues, try:
-   rm prisma/dev.db
-   npx prisma migrate reset
-   ```
+1. **For Users**
+   - Can't connect your Ramp account?
+     - Make sure you're using your regular Ramp login credentials
+     - Try clearing your browser cookies
+     - Contact support if issues persist
 
-2. **Connection Issues**
-   - For users:
-     - Make sure you're logged into your Ramp account
-     - Try clearing your browser cookies if the connection fails
-     - Contact your administrator if issues persist
-   - For administrators:
-     - Check that RAMP_CLIENT_ID and RAMP_CLIENT_SECRET are correctly set in .env
-     - Verify you're using the correct Ramp environment (sandbox/production)
-
-3. **Missing Database** (Administrators only)
-   - If you see database-related errors, make sure you've run the migrations:
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-4. **Type Errors** (Administrators only)
-   - If you see TypeScript errors, try regenerating the Prisma client:
-   ```bash
-   npx prisma generate
-   ```
+2. **For Application Provider**
+   - Database Issues:
+     ```bash
+     # If you have database issues, try:
+     rm prisma/dev.db
+     npx prisma migrate reset
+     ```
+   - Connection Issues:
+     - Verify RAMP_CLIENT_ID and RAMP_CLIENT_SECRET in .env
+     - Check you're using the correct Ramp environment (sandbox/production)
+   - Missing Database:
+     ```bash
+     npx prisma migrate deploy
+     ```
+   - Type Errors:
+     ```bash
+     npx prisma generate
+     ```
 
 ## Learn More
 
