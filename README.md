@@ -1,49 +1,23 @@
 # Ramp Dummy App
 
-A Next.js application that allows users to connect their existing Ramp accounts.
+A Next.js application for connecting to Ramp accounts.
 
-## For Users
+## Setup
 
-To use this application, simply:
-
-1. Click "Connect Ramp Account"
-2. Log in to your existing Ramp account when prompted
-3. Authorize the connection
-
-That's it! No API credentials or technical setup needed - just your regular Ramp login.
-
-## For Application Provider
-
-These steps are only for setting up the application itself:
-
-1. **Set Up Ramp Developer Account** (One-time setup)
-   - Sign up as a Ramp developer at [Ramp Developer Portal](https://developers.ramp.com)
-   - Create an application to get the application's credentials
-   - These credentials are only for the application server
-
-2. **Configure Server**
-   Create a `.env` file in the root directory with:
-   ```
-   DATABASE_URL="file:./dev.db"
-   RAMP_CLIENT_ID=your_application_client_id
-   RAMP_CLIENT_SECRET=your_application_client_secret
-   ```
-
-3. **Initialize Database**
+1. **Install Dependencies**
    ```bash
-   # Install dependencies first
    npm install
    # or
    yarn install
+   ```
 
-   # Generate Prisma client and run migrations
+2. **Initialize Database**
+   ```bash
    npx prisma generate
    npx prisma migrate deploy
    ```
 
 ## Running the Application
-
-After server setup:
 
 ```bash
 npm run dev
@@ -53,11 +27,21 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
 
+## Connecting Your Ramp Account
+
+Simply:
+
+1. Click "Connect Ramp Account"
+2. Log in to your existing Ramp account when prompted
+3. Authorize the connection
+
+That's it! Just use your regular Ramp login credentials.
+
 ## Features
 
 - Easy Ramp account connection
-  - Users just log in with their existing Ramp credentials
-  - No developer account or API setup needed for users
+  - Just use your existing Ramp login
+  - No additional credentials needed
 - Project and client management
 - Approval rules configuration
 - Dynamic approval workflows
@@ -73,30 +57,22 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 Common issues and solutions:
 
-1. **For Users**
-   - Can't connect your Ramp account?
-     - Make sure you're using your regular Ramp login credentials
-     - Try clearing your browser cookies
-     - Contact support if issues persist
+1. **Connection Issues**
+   - Make sure you're using your regular Ramp login credentials
+   - Try clearing your browser cookies
+   - Contact support if issues persist
 
-2. **For Application Provider**
-   - Database Issues:
-     ```bash
-     # If you have database issues, try:
-     rm prisma/dev.db
-     npx prisma migrate reset
-     ```
-   - Connection Issues:
-     - Verify RAMP_CLIENT_ID and RAMP_CLIENT_SECRET in .env
-     - Check you're using the correct Ramp environment (sandbox/production)
-   - Missing Database:
-     ```bash
-     npx prisma migrate deploy
-     ```
-   - Type Errors:
-     ```bash
-     npx prisma generate
-     ```
+2. **Database Issues**
+   ```bash
+   # If you see database errors, try:
+   rm prisma/dev.db
+   npx prisma migrate reset
+   ```
+
+3. **Missing Database**
+   ```bash
+   npx prisma migrate deploy
+   ```
 
 ## Learn More
 
