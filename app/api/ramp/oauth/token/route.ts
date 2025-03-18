@@ -15,12 +15,27 @@ export async function POST(request: NextRequest) {
     console.log('Token request received:', { grant_type, business_id, has_code: !!code });
     
     if (!process.env.RAMP_CLIENT_ID || !process.env.RAMP_CLIENT_SECRET) {
+      console.error('Missing environment variables:', {
+        has_client_id: !!process.env.RAMP_CLIENT_ID,
+        has_client_secret: !!process.env.RAMP_CLIENT_SECRET
+      });
       throw new Error('Missing Ramp credentials in environment variables');
     }
+
+    // Log the first few characters of each credential for debugging
+    console.log('Client credentials:', {
+      client_id_length: process.env.RAMP_CLIENT_ID.length,
+      client_secret_length: process.env.RAMP_CLIENT_SECRET.length,
+      client_id_preview: process.env.RAMP_CLIENT_ID.substring(0, 4) + '...',
+      client_secret_preview: process.env.RAMP_CLIENT_SECRET.substring(0, 4) + '...'
+    });
 
     const credentials = Buffer.from(
       `${process.env.RAMP_CLIENT_ID}:${process.env.RAMP_CLIENT_SECRET}`
     ).toString('base64');
+
+    // Log the first few characters of the base64 encoded credentials
+    console.log('Base64 credentials preview:', credentials.substring(0, 10) + '...');
 
     let tokenParams;
     
@@ -69,7 +84,10 @@ export async function POST(request: NextRequest) {
         'redirect_uri': redirect_uri
       };
       
-      console.log('Exchanging authorization code');
+      console.log('Exchanging authorization code with params:', {
+        ...tokenParams,
+        code: code.substring(0, 4) + '...' // Only log first 4 chars of code
+      });
     }
 
     // Make the token request
@@ -79,12 +97,18 @@ export async function POST(request: NextRequest) {
         'Authorization': `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: new URLSearchParams(tokenParams)
+      body: new URLSearchParams({
+        ...tokenParams,
+        client_id: process.env.RAMP_CLIENT_ID!,
+        client_secret: process.env.RAMP_CLIENT_SECRET!
+      })
     });
 
     const responseText = await tokenResponse.text();
     console.log('Token response:', {
       status: tokenResponse.status,
+      statusText: tokenResponse.statusText,
+      headers: Object.fromEntries(tokenResponse.headers.entries()),
       body: responseText
     });
 
